@@ -20,10 +20,10 @@ mobile_wumpus = False #If False, Wumpus stays put otherwise moves
 wumpus_move_chance = 50 #50-50 probability that wumpus moves
 
 #Constants for Direction for sake of simplicity 
-UP = 1
-DOWN = 2
-LEFT = 3
-RIGHT = 4
+UP = 0
+DOWN = 1
+LEFT = 2
+RIGHT = 3
 
 #Defined Colors for Game
 BLUE = 0,0,225
@@ -45,17 +45,80 @@ arrows_list = []
 #                                    Methods Used                                          #  
 #==========================================================================================#
 
-print(
+#room creation in background process
+def draw_room(pos, screen):
+        x = 0
+        y= 1
+        exits = cave[player_pos]
+        screen.fill((0,0,0)) #paint black background
+        
+        #draw a room circle in White
+        circleRadius = int((SCREEN_WIDTH//2) * 0.75)
+        pygame.draw.circle(screen, WHITE, (SCREEN_WIDTH//2, SCREEN_HEIGHT//2), circleRadius, 0)
+        
+        #draw exits from room
+        if exits[LEFT] > 0:
+                left = 0
+                top = SCREEN_HEIGHT//2-40
+                pygame.draw.rect(screen, WHITE, ((left, top), (SCREEN_WIDTH//4, 80)), 0)
+
+        if exits[RIGHT] > 0:
+                left = SCREEN_WIDTH-(SCREEN_WIDTH//4)
+                top = SCREEN_HEIGHT//2-40
+                pygame.draw.rect(screen, WHITE, ((left, top), (SCREEN_WIDTH//4, 80)), 0)
+        if exits[UP] > 0:
+                left = SCREEN_HEIGHT//2-40
+                top = 0
+                pygame.draw.rect(screen, WHITE, ((left, top), (80, SCREEN_WIDTH//4)), 0)
+        if exits[DOWN] > 0:
+                left = SCREEN_HEIGHT//2-40
+                top = SCREEN_WIDTH-(SCREEN_WIDTH//4)
+                pygame.draw.rect(screen, WHITE, ((left, top), (80, SCREEN_WIDTH//4)), 0)
+        #draw text
+        
+        
+
+def printInstructions():
+        print(
     '''
         Quest of the Crystal Caverns
         
-        Hi pepol
-        '''
-)
+        [I too lazy to add instructions]
+        ''')
+
+def resetGame():
+        global num_arrows
+        #populateCave()
+        num_arrows = 1
+def checkPygameEvents():
+        global player_pos
+        event = pygame.event.poll()
+        if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                elif event.key == pygame.K_LEFT:
+                        if cave[player_pos][LEFT] > 0:
+                                player_pos = cave[player_pos][LEFT]
+                elif event.key == pygame.K_RIGHT:
+                        if cave[player_pos][RIGHT] > 0:
+                                player_pos = cave[player_pos][RIGHT]
+                elif event.key == pygame.K_UP:
+                        if cave[player_pos][UP] > 0:
+                                player_pos = cave[player_pos][UP]
+                elif event.key == pygame.K_DOWN:
+                        if cave[player_pos][DOWN] > 0:
+                                player_pos = cave[player_pos][DOWN]
+                
 
 #==========================================================================================#
 #                                   Initialization                                         #  
 #==========================================================================================#
+printInstructions()
+input("Press Enter")
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.DOUBLEBUF | pygame.HWSURFACE)
@@ -63,4 +126,13 @@ pygame.display.set_caption("Hunt the Wumpus")
 
 #set up our font
 font = pygame.font.Font(None, 36)
+resetGame()
 
+
+#==========================================================================================#
+#                        Main Game Loop                                                    #
+#==========================================================================================#
+while True:
+        checkPygameEvents()
+        draw_room(player_pos, screen)
+        pygame.display.flip()
